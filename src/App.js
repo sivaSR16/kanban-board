@@ -15,4 +15,6 @@ const App = () => (
 
 export default App;
 console.log("✅ Kanban App loaded");
+console.log('✅ App component loaded');
+
 
