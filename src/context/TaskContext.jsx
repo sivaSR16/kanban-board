@@ -4,6 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 const TaskContext = createContext();
 export const useTasks = () => useContext(TaskContext);
 
+// 🧱 Column order for UI rendering
+export const columnOrder = ['Backlog', 'Doing', 'Review', 'Done'];
+
 const defaultColumns = {
   Backlog: [],
   Doing: [],
@@ -16,9 +19,13 @@ export const TaskProvider = ({ children }) => {
 
   // 🔄 Load from localStorage on first render
   useEffect(() => {
-    const saved = localStorage.getItem('kanbanTasks');
-    if (saved) {
-      setColumns(JSON.parse(saved));
+    try {
+      const saved = JSON.parse(localStorage.getItem('kanbanTasks'));
+      if (saved && typeof saved === 'object') {
+        setColumns(saved);
+      }
+    } catch (err) {
+      console.error('Failed to parse saved tasks:', err);
     }
   }, []);
 
@@ -36,6 +43,8 @@ export const TaskProvider = ({ children }) => {
       priority = '',
       status = 'Backlog',
     } = task;
+
+    if (!title.trim()) return; // 🚫 Prevent empty titles
 
     const newTask = {
       id: uuidv4(),
@@ -88,8 +97,26 @@ export const TaskProvider = ({ children }) => {
     });
   };
 
+  // 🔍 Optional: Get task by ID
+  const getTaskById = (taskId) => {
+    for (const column in columns) {
+      const task = columns[column].find(t => t.id === taskId);
+      if (task) return task;
+    }
+    return null;
+  };
+
   return (
-    <TaskContext.Provider value={{ columns, addTask, moveTask, editTask, deleteTask }}>
+    <TaskContext.Provider
+      value={{
+        columns,
+        addTask,
+        moveTask,
+        editTask,
+        deleteTask,
+        getTaskById,
+      }}
+    >
       {children}
     </TaskContext.Provider>
   );
