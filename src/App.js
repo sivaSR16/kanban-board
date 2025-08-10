@@ -13,6 +13,6 @@ const App = () => (
   </TaskProvider>
 );
 
-
-
 export default App;
+console.log("✅ Kanban App loaded");
+
